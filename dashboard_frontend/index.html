@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API İsteği Gönderen Sayfa</title>
+</head>
+<body>
+    <center>
+        <h1>Invoice Generator</h1>
+    </center>
+    <hr>
+    <h2>Generate Invoice</h2>
+
+    <form id="apiForm">
+        <label for="idInput">ID:</label>
+        <input type="text" id="idInput" name="idInput" required>
+        <br>
+        <label for="amountInput">Amount:</label>
+        <input type="text" id="amountInput" name="amountInput" required>
+        <br>
+        <button type="submit">Gönder</button>
+    </form>
+    <hr>
+    <h2>List Invoices</h2>
+    <table id="responseTable" border="1">
+        <tr>
+            <th>ID</th>
+            <th>Amount</th>
+        </tr>
+    </table>
+
+    <script>
+        const form = document.getElementById('apiForm');
+        const table = document.getElementById('responseTable');
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const id = document.getElementById('idInput').value;
+            const amount = document.getElementById('amountInput').value;
+
+            // POST isteği gönderme
+            fetch('https://c89bzgmem8.execute-api.us-east-1.amazonaws.com/v1', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: id,
+                    amount: amount
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Tabloyu güncelleme
+                const row = table.insertRow(1);
+                const cell1 = row.insertCell(0);
+                const cell2 = row.insertCell(1);
+                cell1.textContent = data.id;
+                cell2.textContent = data.amount;
+            })
+            .catch(error => console.error('Hata:', error));
+        });
+
+        // Her 10 saniyede bir tabloyu güncelleme
+        setInterval(function () {
+            fetch('https://c89bzgmem8.execute-api.us-east-1.amazonaws.com/v1')
+            .then(response => response.json())
+            .then(data => {
+                // Tabloyu temizleme
+                table.innerHTML = '<tr><th>ID</th><th>Amount</th></tr>';
+
+                // Yeni verilerle tabloyu güncelleme
+                data.forEach(item => {
+                    const row = table.insertRow(-1);
+                    const cell1 = row.insertCell(0);
+                    const cell2 = row.insertCell(1);
+                    cell1.textContent = item.id;
+                    cell2.textContent = item.amount;
+                });
+            })
+            .catch(error => console.error('Hata:', error));
+        }, 10000);
+    </script>
+
+</body>
+</html>

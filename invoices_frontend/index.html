@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoices as PDF</title>
+</head>
+<body>
+
+    <h1>Invoices as PDF</h1>
+
+    <hr>
+
+    <table id="getResponseTable" border="1">
+        <tr>
+            <th>ID</th>
+            <th>İndir</th>
+        </tr>
+    </table>
+
+
+  <script>
+        const getTable = document.getElementById('getResponseTable');
+
+        window.onload = function () {
+            fetch('https://24a8l5ic72.execute-api.us-east-1.amazonaws.com/v1')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(item => {
+                    const row = getTable.insertRow(-1);
+                    const cell1 = row.insertCell(0);
+                    const cell2 = row.insertCell(1);
+
+                    cell1.textContent = item.name;
+
+                    const downloadButton = document.createElement('button');
+                    downloadButton.textContent = 'İndir';
+                    downloadButton.onclick = function () {
+                        downloadFile(item.name, item.presigned_url);
+                    };
+
+                    cell2.appendChild(downloadButton);
+                });
+            })
+            .catch(error => console.error('Hata:', error));
+        };
+
+        function downloadFile(name, presigned_url) {
+            const link = document.createElement('a');
+            link.href = `${presigned_url}`; // Dosya indirme URL'sini belirtme
+            link.target = '_blank';
+            link.download = `name`; // İndirilen dosyanın adını belirleme
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+
+</body>
+</html>
